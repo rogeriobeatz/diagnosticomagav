@@ -4,6 +4,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Bizmo — fonte institucional Grupo MAGAV.
+   Coloque os arquivos em public/fonts/ (Bizmo-Regular.woff2 e Bizmo-Bold.woff2). */
+@font-face {
+  font-family: "Bizmo";
+  src: url("/fonts/Bizmo-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Bizmo";
+  src: url("/fonts/Bizmo-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 /*
  * Design system definition.
  *
@@ -19,6 +37,11 @@
  */
 
 @theme inline {
+  --font-sans:
+    "Bizmo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display:
+    "Bizmo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -121,6 +144,7 @@
   }
 
   body {
+    font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-foreground);
   }

@@ -13,7 +13,7 @@ import {
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
-import logo from "@/assets/magav-logo.webp.asset.json";
+import logo from "@/assets/magav-logo-negativo.webp.asset.json";
 import { ESCALA, FATORES, TOTAL_PERGUNTAS, type Escala } from "@/data/diagnostico";
 import { corDoRatio, pontuacaoFator, resultadoCompleto, type Respostas } from "@/lib/diagnostico";
 import { enviarLead } from "@/lib/lead.functions";
