@@ -4,18 +4,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Bizmo — fonte institucional Grupo MAGAV.
-   Coloque os arquivos em public/fonts/ (Bizmo-Regular.woff2 e Bizmo-Bold.woff2). */
+/* Bizmo — fonte institucional Grupo MAGAV (assets CDN). */
 @font-face {
   font-family: "Bizmo";
-  src: url("/fonts/Bizmo-Regular.woff2") format("woff2");
-  font-weight: 400;
+  src: url("/__l5e/assets-v1/db083741-f631-47f5-9e7c-4634f8b0b693/Bizmo-Light.ttf") format("truetype");
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Bizmo";
-  src: url("/fonts/Bizmo-Bold.woff2") format("woff2");
+  src: url("/__l5e/assets-v1/4a6a3af2-085b-4074-a331-3bc3e7e77201/Bizmo-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
