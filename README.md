@@ -33,3 +33,5 @@ npm run dev
 4. Mantenha `SUPABASE_SERVICE_ROLE_KEY` somente no ambiente do servidor; ela nunca deve ser usada em componentes ou variáveis `VITE_*`.
 
 O webhook `LEAD_WEBHOOK_URL` é opcional e funciona como integração secundária. O lead é salvo primeiro no Supabase; se o webhook falhar, o registro permanece preservado no banco.
+
+Para enviar o relatório ao participante e à MAGAV, configure também `RESEND_API_KEY`, `EMAIL_FROM` e `MAGAV_EMAIL`. O domínio usado em `EMAIL_FROM` precisa ser verificado no Resend, com os registros DNS solicitados pelo provedor.
