@@ -13,7 +13,6 @@ import {
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
-import logo from "@/assets/magav-logo-negativo.webp.asset.json";
 import { ESCALA, FATORES, TOTAL_PERGUNTAS, type Escala } from "@/data/diagnostico";
 import { corDoRatio, pontuacaoFator, resultadoCompleto, type Respostas } from "@/lib/diagnostico";
 import { enviarLead } from "@/lib/lead.functions";
@@ -23,6 +22,7 @@ import IsoFallback from "./IsoFallback";
 const CondoScene = lazy(() => import("./CondoScene"));
 
 const STORAGE_KEY = "magav-diagnostico-v1";
+const LOGO_URL = "/assets/Logotipo-Grupo-MAGAV-Horizontal-Negativo.webp";
 const WHATSAPP = "5511999999999";
 const EMAIL = "contato@grupomagav.com.br";
 
@@ -33,6 +33,7 @@ const LeadForm = z.object({
   nome_sindico: z.string().trim().min(2, "Informe o nome do síndico ou gestor").max(120),
   email_contato: z.string().trim().email("E-mail inválido").max(160),
   telefone_contato: z.string().trim().max(40).optional(),
+  consentimento_lgpd: z.literal(true, { errorMap: () => ({ message: "Aceite o uso dos dados para continuar." }) }),
 });
 
 function useWebGL() {
@@ -57,6 +58,7 @@ export default function ExperienciaDiagnostico() {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [erros, setErros] = useState<Record<string, string>>({});
+  const [consentimentoLgpd, setConsentimentoLgpd] = useState(false);
   const [lead, setLead] = useState({ nome_condominio: "", nome_sindico: "", email_contato: "", telefone_contato: "" });
   const webgl = useWebGL();
   const enviar = useServerFn(enviarLead);
@@ -139,7 +141,7 @@ export default function ExperienciaDiagnostico() {
   async function submeterLead(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
-    const parsed = LeadForm.safeParse(lead);
+    const parsed = LeadForm.safeParse({ ...lead, consentimento_lgpd: consentimentoLgpd });
     if (!parsed.success) {
       const map: Record<string, string> = {};
       for (const issue of parsed.error.issues) map[String(issue.path[0])] = issue.message;
@@ -153,6 +155,7 @@ export default function ExperienciaDiagnostico() {
         data: {
           ...parsed.data,
           telefone_contato: parsed.data.telefone_contato ?? "",
+          consentimento_lgpd: consentimentoLgpd,
           data_diagnostico: new Date().toISOString().slice(0, 10),
           respostas,
           pontuacao_por_fator: resultado.fatores.map((f) => ({
@@ -183,7 +186,11 @@ export default function ExperienciaDiagnostico() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Cena */}
-      <div className="pointer-events-none absolute inset-0">
+      <div
+        className={`pointer-events-none absolute inset-0 ${
+          etapa === "quiz" ? "max-lg:bottom-[46%] lg:left-[34%]" : ""
+        }`}
+      >
         {webgl === null ? null : webgl ? (
           <ClientOnly fallback={<IsoFallback zones={zones} active={fator.id} />}>
             <Suspense fallback={<IsoFallback zones={zones} active={fator.id} />}>
@@ -193,13 +200,19 @@ export default function ExperienciaDiagnostico() {
         ) : (
           <IsoFallback zones={zones} active={fator.id} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/10 to-background" />
+        <div
+          className={`absolute inset-0 ${
+            etapa === "quiz"
+              ? "bg-gradient-to-b from-background/35 via-background/0 to-background/30"
+              : "bg-gradient-to-b from-background/80 via-background/10 to-background"
+          }`}
+        />
       </div>
 
       {/* HUD */}
       <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-5 md:px-8">
         <header className="flex items-center justify-between gap-4">
-          <img src={logo.url} alt="Grupo MAGAV" className="h-9 w-auto md:h-11" />
+          <img src={LOGO_URL} alt="Grupo MAGAV" className="h-9 w-auto md:h-11" />
           {etapa === "quiz" && (
             <div className="text-right">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Índice de exposição</p>
@@ -249,9 +262,9 @@ export default function ExperienciaDiagnostico() {
         )}
 
         {etapa === "quiz" && (
-          <section className="flex flex-1 flex-col justify-between gap-6 pt-6">
+          <section className="flex flex-1 flex-col gap-4 pt-[32vh] pb-3 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-5 lg:pt-5">
             {/* Zonas */}
-            <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
+            <div className="grid grid-cols-[minmax(0,1fr)_repeat(5,2.25rem)] gap-1.5 sm:gap-2 md:grid-cols-6 lg:col-span-2">
               {FATORES.map((f, i) => {
                 const r = pontuacaoFator(respostas, f.id);
                 const ativo = i === fatorIdx;
@@ -263,12 +276,14 @@ export default function ExperienciaDiagnostico() {
                       setFatorIdx(i);
                       setPerguntaIdx(0);
                     }}
-                    className={`rounded-xl border p-2.5 text-left backdrop-blur transition disabled:opacity-40 ${
-                      ativo ? "border-primary bg-card/90" : "border-border bg-card/50 hover:bg-card/70"
+                    className={`rounded-xl border p-2.5 text-left backdrop-blur transition disabled:opacity-40 max-sm:px-1.5 ${
+                      ativo
+                        ? "border-primary bg-card/90"
+                        : "border-border bg-card/50 hover:bg-card/70 max-lg:flex max-lg:items-center max-lg:justify-center"
                     }`}
                   >
-                    <p className="truncate text-[11px] font-medium">{f.zona}</p>
-                    <div className="mt-2 h-1.5 rounded-full bg-secondary">
+                    <p className={`truncate text-[11px] font-medium ${!ativo ? "max-lg:hidden" : ""}`}>{f.zona}</p>
+                    <div className={`mt-2 h-1.5 rounded-full bg-secondary ${!ativo ? "max-lg:hidden" : ""}`}>
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
@@ -277,16 +292,17 @@ export default function ExperienciaDiagnostico() {
                         }}
                       />
                     </div>
-                    <p className="mt-1 text-[10px] tabular-nums text-muted-foreground">
+                    <p className={`mt-1 text-[10px] tabular-nums text-muted-foreground ${!ativo ? "max-lg:hidden" : ""}`}>
                       {r.pontos}/{r.maximo}
                     </p>
+                    {!ativo && <span className="hidden size-1.5 rounded-full bg-muted-foreground/60 max-lg:block" />}
                   </button>
                 );
               })}
             </div>
 
             {/* Pergunta */}
-            <div className="rounded-2xl border border-border bg-card/85 p-5 shadow-2xl backdrop-blur-md md:p-7">
+            <div className="rounded-2xl border border-border bg-card/90 p-4 shadow-2xl backdrop-blur-md sm:p-5 md:p-6 lg:col-start-1 lg:row-start-2 lg:w-full lg:max-w-[34rem] lg:self-center">
               <div className="flex items-center justify-between gap-4">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-brand-sage">
                   {fator.zona} · {pergunta.curto}
@@ -297,7 +313,7 @@ export default function ExperienciaDiagnostico() {
               </div>
               <h2 className="mt-3 text-pretty text-lg font-medium leading-snug md:text-2xl">{pergunta.texto}</h2>
 
-              <div className="mt-6 grid gap-2.5 md:grid-cols-3">
+              <div className="mt-5 grid gap-2 md:grid-cols-3 sm:mt-6 sm:gap-2.5">
                 {ESCALA.map((op) => {
                   const selecionada = respostas[pergunta.id] === op.valor;
                   const cor = op.valor === 2 ? "var(--brand-emerald)" : op.valor === 1 ? "var(--brand-sand)" : "var(--brand-alert)";
@@ -305,7 +321,7 @@ export default function ExperienciaDiagnostico() {
                     <button
                       key={op.valor}
                       onClick={() => responder(op.valor)}
-                      className={`group rounded-xl border p-4 text-left transition hover:-translate-y-0.5 ${
+                      className={`group rounded-xl border p-3 text-left transition hover:-translate-y-0.5 sm:p-4 ${
                         selecionada ? "border-transparent" : "border-border bg-secondary/40 hover:bg-secondary/70"
                       }`}
                       style={selecionada ? { backgroundColor: cor, color: "var(--brand-deep)" } : undefined}
@@ -313,7 +329,7 @@ export default function ExperienciaDiagnostico() {
                       <span className="block text-sm font-semibold" style={!selecionada ? { color: cor } : undefined}>
                         {op.curto}
                       </span>
-                      <span className="mt-1 block text-xs opacity-80">{op.label}</span>
+                      <span className="mt-1 hidden text-xs opacity-80 sm:block">{op.label}</span>
                     </button>
                   );
                 })}
@@ -375,6 +391,22 @@ export default function ExperienciaDiagnostico() {
                   </div>
                 ))}
               </div>
+
+              <label className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={consentimentoLgpd}
+                  onChange={(e) => setConsentimentoLgpd(e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0 accent-[var(--brand-emerald)]"
+                />
+                <span>
+                  Autorizo o Grupo MAGAV a usar meus dados para contato e apresentação do diagnóstico, conforme a
+                  política de privacidade.
+                </span>
+              </label>
+              {erros["consentimento_lgpd"] && (
+                <p className="mt-1 text-xs text-destructive">Aceite o uso dos dados para continuar.</p>
+              )}
 
               {erro && <p className="mt-4 text-sm text-destructive">{erro}</p>}
 

@@ -24,3 +24,12 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Leads com Supabase
+
+1. Crie um projeto no [Supabase](https://supabase.com) e execute `supabase/schema.sql` no SQL Editor.
+2. Copie `.env.example` para `.env.local` e preencha `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`.
+3. Para a Vercel, cadastre as mesmas variáveis em Project Settings > Environment Variables.
+4. Mantenha `SUPABASE_SERVICE_ROLE_KEY` somente no ambiente do servidor; ela nunca deve ser usada em componentes ou variáveis `VITE_*`.
+
+O webhook `LEAD_WEBHOOK_URL` é opcional e funciona como integração secundária. O lead é salvo primeiro no Supabase; se o webhook falhar, o registro permanece preservado no banco.
