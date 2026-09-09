@@ -122,7 +122,12 @@ export const enviarLead = createServerFn({ method: "POST" })
       }
     }
 
-    const emailEnviado = await enviarRelatorioPorEmail(data);
+    let emailEnviado = false;
+    try {
+      emailEnviado = await enviarRelatorioPorEmail(data);
+    } catch (error) {
+      console.error("E-mail do relatório indisponível após salvar o lead:", error);
+    }
 
     return { enviado: true as const, emailEnviado };
   });
