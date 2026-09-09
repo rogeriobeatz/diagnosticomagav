@@ -44,9 +44,10 @@ export const enviarLead = createServerFn({ method: "POST" })
       console.warn("Supabase não configurado: lead registrado apenas por e-mail.");
     }
 
-    const { enviarEmail, emailSindico, emailEquipe, EMAIL_EQUIPE } = await import("./email.server");
+    const { enviarEmail, emailSindico, emailEquipe, equipe } = await import("./email.server");
+    const emailDaEquipe = equipe();
     await enviarEmail({
-      to: [EMAIL_EQUIPE],
+      to: [emailDaEquipe],
       subject: `Novo diagnóstico: ${data.nome_condominio} — ${data.pontuacao_total}/96`,
       html: emailEquipe(data),
       replyTo: data.email_contato,
@@ -56,7 +57,7 @@ export const enviarLead = createServerFn({ method: "POST" })
         to: [data.email_contato],
         subject: `Resultado do diagnóstico — ${data.nome_condominio}`,
         html: emailSindico(data),
-        replyTo: EMAIL_EQUIPE,
+        replyTo: emailDaEquipe,
       });
     } catch (error) {
       console.error("Falha ao enviar e-mail ao síndico:", error);
