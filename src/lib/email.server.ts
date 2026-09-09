@@ -26,7 +26,7 @@ export async function enviarEmail(input: {
       "X-Connection-Api-Key": resendKey,
     },
     body: JSON.stringify({
-      from: EMAIL_REMETENTE,
+      from: remetente(),
       to: input.to,
       subject: input.subject,
       html: input.html,
