@@ -24,25 +24,44 @@ export type LeadPayload = z.infer<typeof LeadSchema>;
 export const enviarLead = createServerFn({ method: "POST" })
   .validator((input: unknown) => LeadSchema.parse(input))
   .handler(async ({ data }) => {
+    const consentimentoEm = new Date().toISOString();
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseServiceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      throw new Error("Supabase não configurado no ambiente do servidor.");
+
+    if (supabaseUrl && supabaseServiceRoleKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const { error: databaseError } = await supabase.from("leads").insert({
+        ...data,
+        consentimento_em: consentimentoEm,
+        origem: "diagnostico-magav",
+      });
+      if (databaseError) {
+        console.error("Supabase falhou ao salvar lead:", databaseError);
+      }
+    } else {
+      console.warn("Supabase não configurado: lead registrado apenas por e-mail.");
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
+    const { enviarEmail, emailSindico, emailEquipe, EMAIL_EQUIPE } = await import("./email.server");
+    await enviarEmail({
+      to: [EMAIL_EQUIPE],
+      subject: `Novo diagnóstico: ${data.nome_condominio} — ${data.pontuacao_total}/96`,
+      html: emailEquipe(data),
+      replyTo: data.email_contato,
     });
-    const consentimentoEm = new Date().toISOString();
-    const { error: databaseError } = await supabase.from("leads").insert({
-      ...data,
-      consentimento_em: consentimentoEm,
-      origem: "diagnostico-magav",
-    });
-    if (databaseError) {
-      console.error("Supabase falhou ao salvar lead:", databaseError);
-      throw new Error("Não foi possível registrar o diagnóstico.");
+    try {
+      await enviarEmail({
+        to: [data.email_contato],
+        subject: `Resultado do diagnóstico — ${data.nome_condominio}`,
+        html: emailSindico(data),
+        replyTo: EMAIL_EQUIPE,
+      });
+    } catch (error) {
+      console.error("Falha ao enviar e-mail ao síndico:", error);
     }
+
 
     const webhook = process.env["LEAD_WEBHOOK_URL"];
     if (webhook) {
