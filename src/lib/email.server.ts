@@ -1,7 +1,8 @@
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
-export const EMAIL_REMETENTE = "Grupo MAGAV <diagnostico@magav.com.br>";
-export const EMAIL_EQUIPE = "atila@magav.com.br";
+export const EMAIL_REMETENTE = process.env["EMAIL_REMETENTE"] ?? "Grupo MAGAV <noreply@magav.com.br>";
+export const EMAIL_EQUIPE = process.env["EMAIL_EQUIPE"] ?? "atila@magav.com.br";
+
 
 export async function enviarEmail(input: {
   to: string[];
