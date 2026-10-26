@@ -186,7 +186,7 @@ export function emailEquipe(d: Dados) {
     const linhas = f.perguntas
       .map((p) => {
         const v = r[p.id];
-        const rot = v === undefined ? { txt: "—", cor: "#6d7c78", bg: "#f0f0f0" } : ROTULO[v];
+        const rot = (v === undefined ? undefined : ROTULO[v]) ?? { txt: "—", cor: "#6d7c78", bg: "#f0f0f0" };
         return `<tr>
           <td style="padding:10px 8px 10px 0;border-bottom:1px solid #eef2f0;font-size:13px;color:#41514d;vertical-align:top;width:36px;"><strong style="color:#12312c;">${p.id}</strong></td>
           <td style="padding:10px 8px;border-bottom:1px solid #eef2f0;font-size:13px;line-height:1.5;color:#1c2b2b;">${escapar(p.texto)}</td>
