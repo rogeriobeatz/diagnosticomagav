@@ -124,7 +124,7 @@ const ROTULO_CURTO: Record<string, string> = {};
 export function radarUrl(fatores: Fator[]) {
   const labels = fatores.map((f) => {
     const n = ROTULO_CURTO[f.id] ?? f.nome.split(/\s*[&·—-]\s*/)[0];
-    return `${n} (${f.pontos}/${f.maximo})`;
+    return [...n.split(" "), `${f.pontos}/${f.maximo}`];
   });
   const config = {
     type: "radar",
@@ -144,6 +144,7 @@ export function radarUrl(fatores: Fator[]) {
       ],
     },
     options: {
+      layout: { padding: 10 },
       plugins: { legend: { display: false } },
       scales: {
         r: {
@@ -152,7 +153,7 @@ export function radarUrl(fatores: Fator[]) {
           ticks: { stepSize: 4, backdropColor: "transparent", color: "#8a9793", font: { size: 11 } },
           grid: { color: "#dfe7e4" },
           angleLines: { color: "#dfe7e4" },
-          pointLabels: { color: "#12312c", font: { size: 13, weight: "bold" } },
+          pointLabels: { color: "#12312c", font: { size: 12, weight: "bold" } },
         },
       },
     },
