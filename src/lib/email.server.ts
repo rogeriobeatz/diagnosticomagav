@@ -119,6 +119,47 @@ function corRatio(r: number) {
   return r >= 0.75 ? "#2f9e6f" : r >= 0.45 ? "#c9a227" : "#d4483b";
 }
 
+const ROTULO_CURTO: Record<string, string> = {};
+
+export function radarUrl(fatores: Fator[]) {
+  const labels = fatores.map((f) => {
+    const n = ROTULO_CURTO[f.id] ?? f.nome.split(/\s*[&·—-]\s*/)[0];
+    return `${n} (${f.pontos}/${f.maximo})`;
+  });
+  const config = {
+    type: "radar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Pontuação",
+          data: fatores.map((f) => f.pontos),
+          backgroundColor: "rgba(30,75,65,0.28)",
+          borderColor: "#12312c",
+          borderWidth: 3,
+          pointBackgroundColor: fatores.map((f) => corRatio(f.maximo ? f.pontos / f.maximo : 0)),
+          pointBorderColor: "#ffffff",
+          pointRadius: 6,
+        },
+      ],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0,
+          max: 16,
+          ticks: { stepSize: 4, backdropColor: "transparent", color: "#8a9793", font: { size: 11 } },
+          grid: { color: "#dfe7e4" },
+          angleLines: { color: "#dfe7e4" },
+          pointLabels: { color: "#12312c", font: { size: 13, weight: "bold" } },
+        },
+      },
+    },
+  };
+  return `https://quickchart.io/chart?v=4&w=520&h=420&devicePixelRatio=2&bkg=white&c=${encodeURIComponent(JSON.stringify(config))}`;
+}
+
 export function promptClaude(d: Dados) {
   const r = d.respostas ?? {};
   const linhas: string[] = [];
@@ -247,6 +288,9 @@ export function emailEquipe(d: Dados) {
 
     <div style="background:#ffffff;border:1px solid #e3e9e6;border-radius:14px;padding:18px;margin-bottom:24px;">
       <p style="margin:0 0 8px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#6d7c78;">Pontuação por fator</p>
+      <div style="text-align:center;margin:0 0 12px;">
+        <img src="${radarUrl(d.pontuacao_por_fator)}" width="520" alt="Gráfico de radar da pontuação por fator" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border:0;" />
+      </div>
       <table style="width:100%;border-collapse:collapse;">${fatoresCards}</table>
     </div>
 
