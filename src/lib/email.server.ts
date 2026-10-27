@@ -123,7 +123,7 @@ const ROTULO_CURTO: Record<string, string> = {};
 
 export function radarUrl(fatores: Fator[]) {
   const labels = fatores.map((f) => {
-    const n = ROTULO_CURTO[f.id] ?? f.nome.split(/\s*[&·—-]\s*/)[0];
+    const n = ROTULO_CURTO[f.id] ?? f.nome.split(/\s*[&·—-]\s*/)[0] ?? f.nome;
     return [...n.split(" "), `${f.pontos}/${f.maximo}`];
   });
   const config = {
