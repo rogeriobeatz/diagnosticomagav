@@ -23,7 +23,7 @@ const CondoScene = lazy(() => import("./CondoScene"));
 
 const STORAGE_KEY = "magav-diagnostico-v1";
 const LOGO_URL = "/assets/Logotipo-Grupo-MAGAV-Horizontal-Negativo.webp";
-const WHATSAPP = "5511999999999";
+const WHATSAPP = "5541996839613";
 const EMAIL = "contato@grupomagav.com.br";
 
 type Etapa = "intro" | "quiz" | "lead" | "resultado";
