@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the result radar in a browser-safe presentation component using local SVG and design tokens, so the final summary does not depend on an external chart service.
