@@ -18,13 +18,14 @@ import { corDoRatio, pontuacaoFator, resultadoCompleto, type Respostas } from "@
 import { enviarLead } from "@/lib/lead.functions";
 import type { ZoneMap } from "./CondoScene";
 import IsoFallback from "./IsoFallback";
+import ResultadoRadar from "./ResultadoRadar";
+import { Button } from "@/components/ui/button";
 
 const CondoScene = lazy(() => import("./CondoScene"));
 
 const STORAGE_KEY = "magav-diagnostico-v1";
 const LOGO_URL = "/assets/Logotipo-Grupo-MAGAV-Horizontal-Negativo.webp";
 const WHATSAPP = "5541996839613";
-const EMAIL = "contato@grupomagav.com.br";
 
 type Etapa = "intro" | "quiz" | "lead" | "resultado";
 
@@ -427,7 +428,12 @@ export default function ExperienciaDiagnostico() {
 
         {etapa === "resultado" && (
           <section className="flex flex-1 flex-col items-center justify-center py-8 text-center">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-brand-sage">Placar do condomínio</p>
+            <p role="status" className="mb-6 inline-flex max-w-2xl items-start gap-3 text-left text-sm text-brand-sage">
+              <Mail className="mt-0.5 size-5 shrink-0" />
+              <span>O envio do resumo para <strong className="break-all">{lead.email_contato}</strong> é automático. Confira também a pasta de spam.</span>
+            </p>
+            <h1 className="text-2xl font-semibold md:text-3xl">Seu diagnóstico de segurança</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{lead.nome_condominio}</p>
             <p className="mt-2 text-6xl font-semibold tabular-nums md:text-7xl">
               {resultado.total}
               <span className="text-2xl text-muted-foreground md:text-3xl">/96</span>
@@ -436,10 +442,13 @@ export default function ExperienciaDiagnostico() {
               {resultado.percentual}% · {resultado.nivel.label}
             </p>
 
-            <div className="mt-8 grid w-full max-w-3xl grid-cols-2 gap-2 md:grid-cols-6">
+            <div className="mt-6 w-full max-w-lg">
+              <ResultadoRadar fatores={resultado.fatores} />
+            </div>
+            <div className="mt-6 grid w-full max-w-3xl grid-cols-2 gap-2 md:grid-cols-3">
               {resultado.fatores.map((f) => (
                 <div key={f.id} className="rounded-xl border border-border bg-card/70 p-3 text-left backdrop-blur">
-                  <p className="truncate text-[11px] text-muted-foreground">{f.zona}</p>
+                  <p className="text-[11px] text-muted-foreground">{f.zona}</p>
                   <p className="mt-1 text-lg font-semibold tabular-nums" style={{ color: corDoRatio(f.ratio) }}>
                     {f.pontos}
                     <span className="text-xs text-muted-foreground">/16</span>
@@ -448,31 +457,26 @@ export default function ExperienciaDiagnostico() {
               ))}
             </div>
 
-            <div className="mt-8 w-full max-w-2xl rounded-2xl border border-destructive/40 bg-card/85 p-6 text-left backdrop-blur-md">
+            <div className="mt-8 w-full max-w-2xl border-t border-border pt-6 text-left">
               <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-destructive">
                 <ShieldAlert className="size-4" /> Ponto crítico
               </p>
               <h2 className="mt-2 text-2xl font-semibold">{resultado.maisFraco.nome}</h2>
               <p className="mt-2 text-sm text-muted-foreground">{resultado.diagnosticoMaisFraco}</p>
               <p className="mt-4 text-sm">
-                O relatório completo — com as 48 respostas cruzadas, prioridades e plano de ação por fator — é
-                apresentado por um especialista do Grupo MAGAV.
+                Entenda as prioridades do seu condomínio com um especialista do Grupo MAGAV.
+                Fale pelo WhatsApp para agendar a apresentação do relatório completo e dos próximos passos.
               </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6">
+                <Button asChild className="h-auto w-full whitespace-normal px-6 py-4 text-center font-semibold">
                 <a
                   href={`https://wa.me/${WHATSAPP}?text=${mensagemWhats}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 font-semibold text-primary-foreground transition hover:brightness-110"
                 >
-                  <MessageCircle className="size-4" /> Falar no WhatsApp
+                  <MessageCircle className="size-4" /> Agendar apresentação pelo WhatsApp
                 </a>
-                <a
-                  href={`mailto:${EMAIL}?subject=${encodeURIComponent("Relatório do Diagnóstico de Segurança Condominial")}`}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-border px-6 py-3.5 font-semibold transition hover:bg-secondary/60"
-                >
-                  <Mail className="size-4" /> Enviar e-mail
-                </a>
+                </Button>
               </div>
             </div>
           </section>
