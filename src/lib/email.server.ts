@@ -46,6 +46,9 @@ export async function enviarEmail(input: {
   return (await response.json()) as { id?: string };
 }
 
+export const maxTotal = (d: { pontuacao_por_fator: { maximo: number }[] }) =>
+  d.pontuacao_por_fator.reduce((acc, f) => acc + f.maximo, 0);
+
 const escapar = (valor: string) =>
   valor.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -94,7 +97,7 @@ export function emailSindico(d: Dados) {
       Resultado do condomínio <strong>${escapar(d.nome_condominio)}</strong>, respondido em ${escapar(d.data_diagnostico)}.
     </p>
     <div style="background:#f4f7f5;border-radius:12px;padding:20px;margin-bottom:24px;">
-      <p style="margin:0;font-size:36px;font-weight:700;color:#12312c;">${d.pontuacao_total}<span style="font-size:18px;color:#6d7c78;">/96</span></p>
+      <p style="margin:0;font-size:36px;font-weight:700;color:#12312c;">${d.pontuacao_total}<span style="font-size:18px;color:#6d7c78;">/${maxTotal(d)}</span></p>
       <p style="margin:4px 0 0;font-size:14px;color:#41514d;">${d.percentual}% · ${escapar(d.nivel)}</p>
     </div>
     <h2 style="margin:0 0 8px;font-size:16px;color:#12312c;">Pontuação por zona</h2>
@@ -175,10 +178,10 @@ export function promptClaude(d: Dados) {
   linhas.push(`Data do diagnóstico: ${d.data_diagnostico}`);
   linhas.push("");
   linhas.push("## RESULTADO GERAL");
-  linhas.push(`Pontuação total: ${d.pontuacao_total}/96 (${d.percentual}%)`);
+  linhas.push(`Pontuação total: ${d.pontuacao_total}/${maxTotal(d)} (${d.percentual}%)`);
   linhas.push(`Nível: ${d.nivel}`);
   linhas.push(`Fator mais fraco: ${d.fator_mais_fraco}`);
-  linhas.push("Escala: 2 = Sim/Sempre/Funcionando bem · 1 = Parcialmente/Com falhas · 0 = Não/Nunca/Não existe · -1 = Não sei/Não se aplica (vale 0 ponto; indica falta de informação a investigar)");
+  linhas.push("Escala: 2 = Sim/Sempre/Funcionando bem · 1 = Parcialmente/Com falhas · 0 = Não/Nunca/Não existe · -1 = Não sei/Não se aplica (fica fora do cálculo e reduz a pontuação máxima; indica falta de informação a investigar)");
   linhas.push("");
   linhas.push("## RESPOSTAS POR FATOR");
   for (const f of FATORES) {
@@ -263,7 +266,7 @@ export function emailEquipe(d: Dados) {
     </div>
 
     <table style="width:100%;border-collapse:collapse;margin:0 -6px 10px;"><tr>
-      ${card("Pontuação", `${d.pontuacao_total}<span style="font-size:13px;color:#6d7c78;">/96</span>`, corGeral)}
+      ${card("Pontuação", `${d.pontuacao_total}<span style="font-size:13px;color:#6d7c78;">/${maxTotal(d)}</span>`, corGeral)}
       ${card("Índice", `${d.percentual}%`, corGeral)}
       ${card("Nível", escapar(d.nivel), corGeral)}
     </tr></table>

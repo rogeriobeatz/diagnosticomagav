@@ -10,4 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep the result radar in a browser-safe presentation component using local SVG and design tokens, so the final summary does not depend on an external chart service.
-- "Não sei / Não se aplica" is stored as -1 and scores 0 points; keep maxima (16/96) unchanged so DB checks and reports stay valid.
+- "Não sei / Não se aplica" is stored as -1 and is excluded from scoring: each one lowers the factor max by 2; totals/percent use the dynamic max (sum of factor maximo), never a hardcoded 96.

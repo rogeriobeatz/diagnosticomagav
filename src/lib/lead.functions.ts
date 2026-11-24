@@ -52,7 +52,7 @@ export const enviarLead = createServerFn({ method: "POST" })
     try {
       await enviarEmail({
         to: [emailDaEquipe],
-        subject: `Novo diagnóstico: ${data.nome_condominio} — ${data.pontuacao_total}/96`,
+        subject: `Novo diagnóstico: ${data.nome_condominio} — ${data.pontuacao_total}/${data.pontuacao_por_fator.reduce((a, f) => a + f.maximo, 0)}`,
         html: emailEquipe(data),
         replyTo: data.email_contato,
       });

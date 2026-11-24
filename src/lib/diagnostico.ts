@@ -2,7 +2,6 @@ import {
   DIAGNOSTICO_POR_FATOR,
   FATORES,
   PONTUACAO_MAXIMA_FATOR,
-  PONTUACAO_MAXIMA_TOTAL,
   type Escala,
 } from "@/data/diagnostico";
 
@@ -23,10 +22,12 @@ export function pontuacaoFator(respostas: Respostas, fatorId: string): Resultado
   const fator = FATORES.find((f) => f.id === fatorId)!;
   let pontos = 0;
   let respondidas = 0;
+  let naoSei = 0;
   for (const p of fator.perguntas) {
     const v = respostas[p.id];
     if (v !== undefined) {
-      pontos += Math.max(0, v);
+      if (v < 0) naoSei += 1;
+      else pontos += v;
       respondidas += 1;
     }
   }
@@ -35,8 +36,9 @@ export function pontuacaoFator(respostas: Respostas, fatorId: string): Resultado
     nome: fator.nome,
     zona: fator.zona,
     pontos,
-    maximo: PONTUACAO_MAXIMA_FATOR,
-    ratio: pontos / PONTUACAO_MAXIMA_FATOR,
+    // "Não sei / Não se aplica" sai da conta: cada uma reduz o máximo em 2.
+    maximo: PONTUACAO_MAXIMA_FATOR - naoSei * 2,
+    ratio: PONTUACAO_MAXIMA_FATOR - naoSei * 2 > 0 ? pontos / (PONTUACAO_MAXIMA_FATOR - naoSei * 2) : 0,
     respondidas,
     total: fator.perguntas.length,
   };
@@ -45,20 +47,22 @@ export function pontuacaoFator(respostas: Respostas, fatorId: string): Resultado
 export function resultadoCompleto(respostas: Respostas) {
   const fatores = FATORES.map((f) => pontuacaoFator(respostas, f.id));
   const total = fatores.reduce((acc, f) => acc + f.pontos, 0);
-  const maisFraco = [...fatores].sort((a, b) => a.pontos - b.pontos)[0]!;
+  const maximo = fatores.reduce((acc, f) => acc + f.maximo, 0);
+  const avaliados = fatores.filter((f) => f.maximo > 0);
+  const maisFraco = [...(avaliados.length ? avaliados : fatores)].sort((a, b) => a.ratio - b.ratio)[0]!;
+  const percentual = maximo > 0 ? Math.round((total / maximo) * 100) : 0;
   return {
     fatores,
     total,
-    maximo: PONTUACAO_MAXIMA_TOTAL,
-    percentual: Math.round((total / PONTUACAO_MAXIMA_TOTAL) * 100),
+    maximo,
+    percentual,
     maisFraco,
     diagnosticoMaisFraco: DIAGNOSTICO_POR_FATOR[maisFraco.id] ?? "",
-    nivel: nivelDeMaturidade(total),
+    nivel: nivelDeMaturidade(percentual),
   };
 }
 
-export function nivelDeMaturidade(total: number) {
-  const pct = (total / PONTUACAO_MAXIMA_TOTAL) * 100;
+export function nivelDeMaturidade(pct: number) {
   if (pct >= 85) return { label: "Maturidade avançada", tom: "alto" as const };
   if (pct >= 65) return { label: "Maturidade intermediária", tom: "medio" as const };
   if (pct >= 40) return { label: "Exposição relevante", tom: "baixo" as const };

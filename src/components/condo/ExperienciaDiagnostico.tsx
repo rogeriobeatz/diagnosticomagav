@@ -181,7 +181,7 @@ export default function ExperienciaDiagnostico() {
   }
 
   const mensagemWhats = encodeURIComponent(
-    `Olá! Concluí o Diagnóstico de Segurança Condominial do Grupo MAGAV. Condomínio: ${lead.nome_condominio || "—"}. Pontuação: ${resultado.total}/96. Gostaria de agendar a apresentação do relatório.`,
+    `Olá! Concluí o Diagnóstico de Segurança Condominial do Grupo MAGAV. Condomínio: ${lead.nome_condominio || "—"}. Pontuação: ${resultado.total}/${resultado.maximo}. Gostaria de agendar a apresentação do relatório.`,
   );
 
   return (
@@ -288,7 +288,7 @@ export default function ExperienciaDiagnostico() {
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${(r.pontos / r.maximo) * 100}%`,
+                          width: `${r.ratio * 100}%`,
                           backgroundColor: corDoRatio(r.respondidas ? r.pontos / (r.respondidas * 2) : 0),
                         }}
                       />
@@ -436,7 +436,7 @@ export default function ExperienciaDiagnostico() {
             <p className="mt-2 text-sm text-muted-foreground">{lead.nome_condominio}</p>
             <p className="mt-2 text-6xl font-semibold tabular-nums md:text-7xl">
               {resultado.total}
-              <span className="text-2xl text-muted-foreground md:text-3xl">/96</span>
+              <span className="text-2xl text-muted-foreground md:text-3xl">/{resultado.maximo}</span>
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               {resultado.percentual}% · {resultado.nivel.label}
@@ -451,7 +451,7 @@ export default function ExperienciaDiagnostico() {
                   <p className="text-[11px] text-muted-foreground">{f.zona}</p>
                   <p className="mt-1 text-lg font-semibold tabular-nums" style={{ color: corDoRatio(f.ratio) }}>
                     {f.pontos}
-                    <span className="text-xs text-muted-foreground">/16</span>
+                    <span className="text-xs text-muted-foreground">/{f.maximo}</span>
                   </p>
                 </div>
               ))}
