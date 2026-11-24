@@ -26,7 +26,7 @@ export function pontuacaoFator(respostas: Respostas, fatorId: string): Resultado
   for (const p of fator.perguntas) {
     const v = respostas[p.id];
     if (v !== undefined) {
-      pontos += v;
+      pontos += Math.max(0, v);
       respondidas += 1;
     }
   }

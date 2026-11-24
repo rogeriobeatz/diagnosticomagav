@@ -1,4 +1,6 @@
-export type Escala = 0 | 1 | 2;
+/** -1 = "Não sei / Não se aplica": registrado, mas soma 0 pontos. */
+export type Escala = -1 | 0 | 1 | 2;
+export const NAO_SEI: Escala = -1;
 
 export type Pergunta = { id: string; texto: string; curto: string };
 
@@ -15,6 +17,7 @@ export const ESCALA: { valor: Escala; label: string; curto: string }[] = [
   { valor: 2, label: "Sim / Sempre / Funcionando bem", curto: "Sim" },
   { valor: 1, label: "Parcialmente / Às vezes / Com falhas", curto: "Parcialmente" },
   { valor: 0, label: "Não / Nunca / Não existe", curto: "Não" },
+  { valor: -1, label: "Não sei / Não se aplica", curto: "Não sei" },
 ];
 
 export const PONTUACAO_MAXIMA_TOTAL = 96;

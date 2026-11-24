@@ -9,7 +9,7 @@ const LeadSchema = z.object({
   telefone_contato: z.string().trim().max(40).optional().default(""),
   consentimento_lgpd: z.literal(true),
   data_diagnostico: z.string().trim().min(4).max(30),
-  respostas: z.record(z.string().max(10), z.number().int().min(0).max(2)),
+  respostas: z.record(z.string().max(10), z.number().int().min(-1).max(2)),
   pontuacao_por_fator: z.array(
     z.object({ id: z.string().max(10), nome: z.string().max(80), pontos: z.number(), maximo: z.number() }),
   ),

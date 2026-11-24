@@ -314,10 +314,10 @@ export default function ExperienciaDiagnostico() {
               </div>
               <h2 className="mt-3 text-pretty text-lg font-medium leading-snug md:text-2xl">{pergunta.texto}</h2>
 
-              <div className="mt-5 grid gap-2 md:grid-cols-3 sm:mt-6 sm:gap-2.5">
+              <div className="mt-5 grid gap-2 grid-cols-2 md:grid-cols-4 sm:mt-6 sm:gap-2.5">
                 {ESCALA.map((op) => {
                   const selecionada = respostas[pergunta.id] === op.valor;
-                  const cor = op.valor === 2 ? "var(--brand-emerald)" : op.valor === 1 ? "var(--brand-sand)" : "var(--brand-alert)";
+                  const cor = op.valor === 2 ? "var(--brand-emerald)" : op.valor === 1 ? "var(--brand-sand)" : op.valor === 0 ? "var(--brand-alert)" : "var(--muted-foreground)";
                   return (
                     <button
                       key={op.valor}

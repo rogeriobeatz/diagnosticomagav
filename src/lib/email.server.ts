@@ -113,6 +113,7 @@ const ROTULO: Record<number, { txt: string; cor: string; bg: string }> = {
   2: { txt: "Sim", cor: "#1f7a54", bg: "#e6f4ec" },
   1: { txt: "Parcial", cor: "#8a6d0b", bg: "#fbf3d9" },
   0: { txt: "Não", cor: "#b2362b", bg: "#fbe7e5" },
+  [-1]: { txt: "Não sei / N.A.", cor: "#55636a", bg: "#eceff1" },
 };
 
 function corRatio(r: number) {
@@ -177,7 +178,7 @@ export function promptClaude(d: Dados) {
   linhas.push(`Pontuação total: ${d.pontuacao_total}/96 (${d.percentual}%)`);
   linhas.push(`Nível: ${d.nivel}`);
   linhas.push(`Fator mais fraco: ${d.fator_mais_fraco}`);
-  linhas.push("Escala: 2 = Sim/Sempre/Funcionando bem · 1 = Parcialmente/Com falhas · 0 = Não/Nunca/Não existe");
+  linhas.push("Escala: 2 = Sim/Sempre/Funcionando bem · 1 = Parcialmente/Com falhas · 0 = Não/Nunca/Não existe · -1 = Não sei/Não se aplica (vale 0 ponto; indica falta de informação a investigar)");
   linhas.push("");
   linhas.push("## RESPOSTAS POR FATOR");
   for (const f of FATORES) {
@@ -195,7 +196,7 @@ export function promptClaude(d: Dados) {
 
 export function emailEquipe(d: Dados) {
   const r = d.respostas ?? {};
-  const cnt = { 2: 0, 1: 0, 0: 0 } as Record<number, number>;
+  const cnt = { 2: 0, 1: 0, 0: 0, [-1]: 0 } as Record<number, number>;
   Object.values(r).forEach((v) => (cnt[v] = (cnt[v] ?? 0) + 1));
   const corGeral = corRatio(d.percentual / 100);
 
@@ -280,6 +281,8 @@ export function emailEquipe(d: Dados) {
       ${card("Respostas Sim", String(cnt[2] ?? 0), "#1f7a54")}
       ${card("Parciais", String(cnt[1] ?? 0), "#8a6d0b")}
       ${card("Respostas Não", String(cnt[0] ?? 0), "#b2362b")}
+    </tr><tr>
+      ${card("Não sei / N.A.", String(cnt[-1] ?? 0), "#55636a")}
     </tr></table>
 
     <div style="border:1px solid #f0c9c4;background:#fdf5f4;border-radius:14px;padding:18px;margin-bottom:16px;">
