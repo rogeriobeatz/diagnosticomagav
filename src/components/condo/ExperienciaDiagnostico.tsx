@@ -1,4 +1,4 @@
-import { ClientOnly } from "@tanstack/react-router";
+import { ClientOnly, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft,
@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { z } from "zod";
 
 import { ESCALA, FATORES, TOTAL_PERGUNTAS, type Escala } from "@/data/diagnostico";
@@ -52,6 +52,8 @@ function useWebGL() {
 
 export default function ExperienciaDiagnostico() {
   const [etapa, setEtapa] = useState<Etapa>("intro");
+  const [pronto, setPronto] = useState(false);
+  const [iniciando, iniciarTransicao] = useTransition();
   const [respostas, setRespostas] = useState<Respostas>({});
   const [fatorIdx, setFatorIdx] = useState(0);
   const [perguntaIdx, setPerguntaIdx] = useState(0);
@@ -76,6 +78,8 @@ export default function ExperienciaDiagnostico() {
       }
     } catch {
       /* ignora progresso corrompido */
+    } finally {
+      setPronto(true);
     }
   }, []);
 
@@ -118,11 +122,12 @@ export default function ExperienciaDiagnostico() {
         setPerguntaIdx((i) => i + 1);
         return;
       }
-      setBadge(fator.badge);
-      window.setTimeout(() => setBadge(null), 2200);
       if (ultimoFator) {
+        setBadge(null);
         setEtapa("lead");
       } else {
+        setBadge(fator.badge);
+        window.setTimeout(() => setBadge(null), 2200);
         setFatorIdx((i) => i + 1);
         setPerguntaIdx(0);
       }
@@ -185,7 +190,7 @@ export default function ExperienciaDiagnostico() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-dvh overflow-x-clip bg-background text-foreground">
       {/* Cena */}
       <div
         className={`pointer-events-none absolute inset-0 ${
@@ -211,9 +216,9 @@ export default function ExperienciaDiagnostico() {
       </div>
 
       {/* HUD */}
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-5 md:px-8">
-        <header className="flex items-center justify-between gap-4">
-          <img src={LOGO_URL} alt="Grupo MAGAV" className="h-9 w-auto md:h-11" />
+      <div className="relative z-10 mx-auto flex min-h-dvh max-w-6xl flex-col px-4 py-5 md:px-8">
+        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+          <img src={LOGO_URL} alt="Grupo MAGAV" className="h-auto w-full max-w-48 md:max-w-60" />
           {etapa === "quiz" && (
             <div className="text-right">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Índice de exposição</p>
@@ -239,12 +244,15 @@ export default function ExperienciaDiagnostico() {
               48 perguntas, 6 zonas de risco. A cada resposta a maquete do seu condomínio reage — e você enxerga onde
               está a brecha antes que ela seja usada.
             </p>
-            <button
-              onClick={() => setEtapa("quiz")}
-              className="mt-9 rounded-full bg-primary px-9 py-4 text-base font-semibold text-primary-foreground shadow-lg transition hover:brightness-110"
+            <Button
+              onClick={() => iniciarTransicao(() => setEtapa("quiz"))}
+              disabled={!pronto || iniciando}
+              aria-busy={!pronto || iniciando}
+              className="mt-9 h-auto min-h-14 min-w-64 rounded-full px-9 py-4 text-base font-semibold"
             >
-              {respondidas > 0 ? "Retomar diagnóstico" : "Começar diagnóstico"}
-            </button>
+              {(!pronto || iniciando) && <Loader2 className="size-4 animate-spin" />}
+              {!pronto ? "Carregando diagnóstico…" : iniciando ? "Iniciando diagnóstico…" : respondidas > 0 ? "Retomar diagnóstico" : "Começar diagnóstico"}
+            </Button>
             {respondidas > 0 && (
               <button
                 onClick={() => {
@@ -263,7 +271,7 @@ export default function ExperienciaDiagnostico() {
         )}
 
         {etapa === "quiz" && (
-          <section className="flex flex-1 flex-col gap-4 pt-[32vh] pb-3 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-5 lg:pt-5">
+          <section className="diagnostico-quiz flex flex-1 flex-col gap-4 pt-[min(24svh,10rem)] pb-3 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-5 lg:pt-5">
             {/* Zonas */}
             <div className="grid grid-cols-[minmax(0,1fr)_repeat(5,2.25rem)] gap-1.5 sm:gap-2 md:grid-cols-6 lg:col-span-2">
               {FATORES.map((f, i) => {
@@ -304,8 +312,8 @@ export default function ExperienciaDiagnostico() {
 
             {/* Pergunta */}
             <div className="rounded-2xl border border-border bg-card/90 p-4 shadow-2xl backdrop-blur-md sm:p-5 md:p-6 lg:col-start-1 lg:row-start-2 lg:w-full lg:max-w-[34rem] lg:self-center">
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-brand-sage">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+                <p className="min-w-0 break-words text-[11px] uppercase tracking-[0.18em] text-brand-sage">
                   {fator.zona} · {pergunta.curto}
                 </p>
                 <p className="text-[11px] tabular-nums text-muted-foreground">
@@ -401,8 +409,9 @@ export default function ExperienciaDiagnostico() {
                   className="mt-0.5 size-4 shrink-0 accent-[var(--brand-emerald)]"
                 />
                 <span>
-                  Autorizo o Grupo MAGAV a usar meus dados para contato e apresentação do diagnóstico, conforme a
-                  política de privacidade.
+                  Autorizo o Grupo MAGAV a tratar meus dados e respostas para elaborar e apresentar o diagnóstico,
+                  entrar em contato, preparar orçamentos e realizar pesquisas de mercado, conforme a{" "}
+                  <Link to="/privacidade" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-4">política de privacidade</Link>.
                 </span>
               </label>
               {erros["consentimento_lgpd"] && (
@@ -420,7 +429,7 @@ export default function ExperienciaDiagnostico() {
                 Ver meu resultado
               </button>
               <p className="mt-3 text-center text-[11px] text-muted-foreground">
-                Seus dados são usados apenas para a apresentação do relatório pelo Grupo MAGAV.
+                Você pode revogar seu consentimento e solicitar a exclusão dos dados conforme a política de privacidade.
               </p>
             </form>
           </section>
@@ -488,7 +497,7 @@ export default function ExperienciaDiagnostico() {
       </div>
 
       {/* Badge de conclusão de fator */}
-      {badge && (
+      {badge && etapa === "quiz" && (
         <div className="pointer-events-none fixed bottom-6 left-1/2 z-20 -translate-x-1/2 animate-in fade-in slide-in-from-bottom-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/50 bg-card/95 px-5 py-2.5 text-sm font-medium shadow-xl backdrop-blur">
             <CheckCircle2 className="size-4 text-primary" /> {badge}

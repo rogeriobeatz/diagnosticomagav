@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ApiPublicKeepaliveRouteImport } from './routes/api/public/keepalive'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicKeepaliveRoute = ApiPublicKeepaliveRouteImport.update({
@@ -25,27 +31,31 @@ const ApiPublicKeepaliveRoute = ApiPublicKeepaliveRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/api/public/keepalive': typeof ApiPublicKeepaliveRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/api/public/keepalive': typeof ApiPublicKeepaliveRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/api/public/keepalive': typeof ApiPublicKeepaliveRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/keepalive'
+  fullPaths: '/' | '/privacidade' | '/api/public/keepalive'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/keepalive'
-  id: '__root__' | '/' | '/api/public/keepalive'
+  to: '/' | '/privacidade' | '/api/public/keepalive'
+  id: '__root__' | '/' | '/privacidade' | '/api/public/keepalive'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   ApiPublicKeepaliveRoute: typeof ApiPublicKeepaliveRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/keepalive': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   ApiPublicKeepaliveRoute: ApiPublicKeepaliveRoute,
 }
 export const routeTree = rootRouteImport
