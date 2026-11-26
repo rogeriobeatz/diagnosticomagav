@@ -273,7 +273,14 @@ export default function ExperienciaDiagnostico() {
         {etapa === "quiz" && (
           <section className="diagnostico-quiz flex flex-1 flex-col gap-4 pt-[min(24svh,10rem)] pb-3 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-5 lg:pt-5">
             {/* Zonas */}
-            <div className="grid grid-cols-[minmax(0,1fr)_repeat(5,2.25rem)] gap-1.5 sm:gap-2 md:grid-cols-6 lg:col-span-2">
+            <div
+              className="grid grid-cols-[var(--step-columns)] gap-1.5 sm:gap-2 md:grid-cols-6 lg:col-span-2"
+              style={{
+                "--step-columns": Array.from({ length: FATORES.length }, (_, index) =>
+                  index === fatorIdx ? "minmax(0, 1fr)" : "2.25rem",
+                ).join(" "),
+              } as React.CSSProperties}
+            >
               {FATORES.map((f, i) => {
                 const r = pontuacaoFator(respostas, f.id);
                 const ativo = i === fatorIdx;
